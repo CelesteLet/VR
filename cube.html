@@ -7,14 +7,13 @@
 
         <a-assets>
 
+          <!-- Définition 3d -->
+
           <a-asset-item id="balleObj" src="./ball_V5_L2.123cae994e77-a291-472b-bd76-2d8df59c27a0/ball.obj"></a-asset-item>
             <a-asset-item id="balleMtl" src="./ball_V5_L2.123cae994e77-a291-472b-bd76-2d8df59c27a0/ball.mtl"></a-asset-item>
 
             <a-asset-item id="cirqueObj" src="./Circus_bear_standing_on_large_ball_V1_L293a29c83-6e6f-4fb7-8508-174536c4a81a/14089_Circus_Bear_Standing_on_large_ball_v1_l2.obj"></a-asset-item>
             <a-asset-item id="cirqueMtl" src="./Circus_bear_standing_on_large_ball_V1_L293a29c83-6e6f-4fb7-8508-174536c4a81a/14089_Circus_Bear_Standing_on_large_ball_v1_l2.mtl"></a-asset-item>
-
-            <a-asset-item id="finnObj" src="./uploads_files_2971729_Venti.obj"></a-asset-item>
-            <a-asset-item id="finnMtl" src="./uploads_files_2971729_Venti.mtl"></a-asset-item>
 
             <a-asset-item id="tortueObj" src="./pearlturtle_v1_L2.123c8b254914-0c70-4cc6-bc03-8d58f36d90c5/13103_pearlturtle_v1_l2.obj"></a-asset-item>
             <a-asset-item id="tortueMtl" src="./pearlturtle_v1_L2.123c8b254914-0c70-4cc6-bc03-8d58f36d90c5/13103_pearlturtle_v1_l2.mtl"></a-asset-item>
@@ -33,16 +32,20 @@
         </a-assets>
 
 
+        <!-- Image -->
+
         <img id="m" src="./murr.jpg">
         <img id="s" src="./sol.jpg">
         <img id="c" src="./ciel.jpg">
 
+        <!-- Cube -->
 
         <a-mixin id="ciel" geometry="primitive: plane; width: 4; height: 4"  rotation="90 0 0" material="src: #c; side: double"  ></a-mixin>
         <a-mixin id="sol" geometry="primitive: plane; width: 4; height: 4"  rotation="90 0 0" material="src: #s; side: double"  ></a-mixin>
         <a-mixin id="mur" geometry="primitive: plane; width: 4; height: 4"  rotation="0 0 0" material="src: #m; side: double; repeat: 1 1" ></a-mixin>
         <a-mixin id="murFace" geometry="primitive: plane; width: 4; height: 4"  rotation="0 90 0" material="src: #m; side: double; repeat: 1 1" ></a-mixin>
 
+        <!-- Objet -->
 
         <a-entity mixin="sol" position="0 -0.8 0"></a-entity>
         <a-entity mixin="ciel" position="0 3.2 0"></a-entity>
@@ -89,10 +92,6 @@
 
         <a-entity position ="-1 -0.84 0.7" scale="0.01 0.01 0.01 " rotation="0 90 0"
         obj-model="obj:#villeObj; mtl:#villeMtl">
-        </a-entity>
-
-        <a-entity position ="0 3.34 0.34" scale="0.1 0.1 0.1 " rotation="180 0 0"
-        obj-model="obj:#finnObj; mtl:#finnMtl">
         </a-entity>
 
       <a-sky color="#ECECEC"></a-sky>
