@@ -1,0 +1,101 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+
+        <a-assets>
+
+          <a-asset-item id="balleObj" src="./ball_V5_L2.123cae994e77-a291-472b-bd76-2d8df59c27a0/ball.obj"></a-asset-item>
+            <a-asset-item id="balleMtl" src="./ball_V5_L2.123cae994e77-a291-472b-bd76-2d8df59c27a0/ball.mtl"></a-asset-item>
+
+            <a-asset-item id="cirqueObj" src="./Circus_bear_standing_on_large_ball_V1_L293a29c83-6e6f-4fb7-8508-174536c4a81a/14089_Circus_Bear_Standing_on_large_ball_v1_l2.obj"></a-asset-item>
+            <a-asset-item id="cirqueMtl" src="./Circus_bear_standing_on_large_ball_V1_L293a29c83-6e6f-4fb7-8508-174536c4a81a/14089_Circus_Bear_Standing_on_large_ball_v1_l2.mtl"></a-asset-item>
+
+            <a-asset-item id="finnObj" src="./uploads_files_2971729_Venti.obj"></a-asset-item>
+            <a-asset-item id="finnMtl" src="./uploads_files_2971729_Venti.mtl"></a-asset-item>
+
+            <a-asset-item id="tortueObj" src="./pearlturtle_v1_L2.123c8b254914-0c70-4cc6-bc03-8d58f36d90c5/13103_pearlturtle_v1_l2.obj"></a-asset-item>
+            <a-asset-item id="tortueMtl" src="./pearlturtle_v1_L2.123c8b254914-0c70-4cc6-bc03-8d58f36d90c5/13103_pearlturtle_v1_l2.mtl"></a-asset-item>
+
+            <a-asset-item id="robotObj" src="./robot_v1_L2.123c86652cfe-060e-4864-b404-a435af2c4a07/11696_robot_v1_L3.obj"></a-asset-item>
+            <a-asset-item id="robotMtl" src="./robot_v1_L2.123c86652cfe-060e-4864-b404-a435af2c4a07/11696_robot_v1_L3.mtl"></a-asset-item>
+
+            <a-asset-item id="requinObj" src="./SHARK.obj"></a-asset-item>
+            <a-asset-item id="requinMtl" src="./SHARK.mtl"></a-asset-item>
+
+            <a-asset-item id="villeObj" src="./Scifi downtown/Scifi downtown city.obj"></a-asset-item>
+            <a-asset-item id="villeMtl" src="./Scifi downtown/Scifi_downtown_city.mtl"></a-asset-item>
+
+            <a-asset-item id="avionObj" src="./Airplane_v1_L1.123c4a6fedec-1680-4a36-a228-b0d440a4f280/11803_Airplane_v1_l1.obj"></a-asset-item>
+            <a-asset-item id="avionMtl" src="./Airplane_v1_L1.123c4a6fedec-1680-4a36-a228-b0d440a4f280/11803_Airplane_v1_l1.mtl"></a-asset-item>
+        </a-assets>
+
+
+        <img id="m" src="./murr.jpg">
+        <img id="s" src="./sol.jpg">
+        <img id="c" src="./ciel.jpg">
+
+
+        <a-mixin id="ciel" geometry="primitive: plane; width: 4; height: 4"  rotation="90 0 0" material="src: #c; side: double"  ></a-mixin>
+        <a-mixin id="sol" geometry="primitive: plane; width: 4; height: 4"  rotation="90 0 0" material="src: #s; side: double"  ></a-mixin>
+        <a-mixin id="mur" geometry="primitive: plane; width: 4; height: 4"  rotation="0 0 0" material="src: #m; side: double; repeat: 1 1" ></a-mixin>
+        <a-mixin id="murFace" geometry="primitive: plane; width: 4; height: 4"  rotation="0 90 0" material="src: #m; side: double; repeat: 1 1" ></a-mixin>
+
+
+        <a-entity mixin="sol" position="0 -0.8 0"></a-entity>
+        <a-entity mixin="ciel" position="0 3.2 0"></a-entity>
+        <a-entity mixin="mur" position="0 1.2 2"></a-entity>
+        <a-entity mixin="mur" position="0 1.2 -2"></a-entity>
+        <a-entity mixin="murFace" position="2 1.2 0"></a-entity>
+        <a-entity mixin="murFace" position="-2 1.2 0"></a-entity>
+
+        <a-entity position ="0 3.34 0.34" scale="0.015 0.015 0.015 " rotation="180 0 0"
+        obj-model="obj:#villeObj; mtl:#villeMtl">
+        </a-entity>
+
+        <a-entity position ="-0.23 2.6 -1" scale="0.0008 0.0008 0.0008 " rotation="-67 0 0"
+        obj-model="obj:#avionObj; mtl:#avionMtl">
+        </a-entity>
+
+        <a-entity position ="-0.38 0.75 -1.1" scale="0.2 0.2 0.2 " rotation="-67 0 0"
+        obj-model="obj:#balleObj; mtl:#balleMtl">
+        </a-entity>
+
+        <a-entity position ="0.67 -1.37 -1" scale="0.02 0.02 0.02" rotation="-90 -90 0"
+        obj-model="obj:#cirqueObj; mtl:#cirqueMtl">
+        </a-entity>
+
+        <a-entity position ="0.6 -0.5 0.8" scale="0.08 0.08 0.08 " rotation="-90 0 0"
+        obj-model="obj:#tortueObj; mtl:#tortueMtl">
+        </a-entity>
+
+        <a-entity position ="0.6 0.5 1.8" scale="0.08 0.08 0.08 " rotation="180 0 0"
+        obj-model="obj:#tortueObj; mtl:#tortueMtl">
+        </a-entity>
+
+        <a-entity position ="0.6 2 1.8" scale="0.08 0.08 0.08 " rotation="180 0 0"
+        obj-model="obj:#tortueObj; mtl:#tortueMtl">
+        </a-entity>
+
+        <a-entity position ="-1 1.3 0" scale="0.8 0.8 0.8 " rotation="0 -90 -30"
+        obj-model="obj:#requinObj; mtl:#requinMtl">
+        </a-entity>
+
+        <a-entity position ="0.6 -0.3 0.65" scale="0.05 0.05 0.05 " rotation="-90 180 0"
+        obj-model="obj:#robotObj; mtl:#robotMtl">
+        </a-entity>
+
+        <a-entity position ="-1 -0.84 0.7" scale="0.01 0.01 0.01 " rotation="0 90 0"
+        obj-model="obj:#villeObj; mtl:#villeMtl">
+        </a-entity>
+
+        <a-entity position ="0 3.34 0.34" scale="0.1 0.1 0.1 " rotation="180 0 0"
+        obj-model="obj:#finnObj; mtl:#finnMtl">
+        </a-entity>
+
+      <a-sky color="#ECECEC"></a-sky>
+    </a-scene>
+  </body>
+</html>
