@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.0.1/dist/aframe-extras.min.js"></script>
+    <script src="https://eminet666.github.io/ensaama/components/detect/detect.js"></script>
+    <script src="https://eminet666.github.io/ensaama/components/debug/debug.js"></script>
+    
+    <script>
+    let gauche = { pos: { x: 0, y: 0, z: 0 } }
+    let droite = { pos: { x: 0, y: 0, z: 0 } }
+    let info = true;    
+
+    // POSITION MANETTE (relative par rapport à la caméra)
+    AFRAME.registerComponent('handposition', {
+        schema: {
+            trace: { type: 'boolean', default: false },
+        },
+        tick: function () {
+            var handpos = this.el.object3D.position;
+            var id = this.el.id;
+            if(id=="lefthand") gauche.pos = handpos;
+            if(id=="righthand") droite.pos = handpos;
+
+            if (this.data.trace) {
+                var trace = document.querySelector('#txtlog');
+                var newvalue = 'hand '+id
+                            + '\n x = ' + gauche.pos.x.toFixed(2)
+                            + '\n y = ' + gauche.pos.y.toFixed(2)
+                            + '\n z = ' + gauche.pos.z.toFixed(2);
+                trace.setAttribute('value', newvalue);
+            }
+        }
+    });
+
+    // MODULE FLY
+    AFRAME.registerComponent('fly', {
+        schema: {
+            trace: { type: 'boolean', default: false },
+            vrmode: { type: 'boolean', default: false },
+            scalaire: { type: 'vec3', default: { x: 0.01, y: 0.01, z: 0.01 } }                
+        },              
+        init: function () {
+            this.scalaire = new THREE.Vector3(this.data.scalaire.x, this.data.scalaire.y, this.data.scalaire.z);    
+            var player = this.el;
+            // var trace = this.data.trace;
+
+            //el.setAttribute('fly', 'trace', false);
+            
+            var lefthand = document.getElementById('lefthand');
+            lefthand.addEventListener("ybuttondown", function (event) {
+                console.log("evt: ybuttondown");
+                if(info){ info = false; } else { info = true; }  
+            }); 
+            var lefthand = document.getElementById('lefthand');
+            lefthand.addEventListener("xbuttondown", function (event) {
+                console.log("evt: xbuttondown");
+                player.setAttribute('position', { x: 0, y: 0, z: 0 });
+            });                
+                
+            var navigateur = navigator.userAgent;
+            if (navigateur.includes("Quest")) {
+                vrmode = true;
+                console.log("vrmode = OCULUS");
+            } 
+            else {
+                vrmode = false;
+                console.log("vrmode = ORDI");
+                var player = this.el;
+
+                // DESKTOP MODE
+                window.addEventListener('keydown', function (event) {
+                    if (event.key === 'y') {
+                        console.log(player.id + " evt: ykeydown");
+                        var position = player.getAttribute('position');
+                        position.y += 0.1;
+                        player.setAttribute('position', position);
+                    }
+                    if (event.key === 'u') {
+                        console.log(player.id + " evt: ukeydown");
+                        var position = player.getAttribute('position');
+                        position.y -= 0.1;
+                        player.setAttribute('position', position);
+                    }
+                    if (event.key === 'o') {
+                        console.log(player.id + " evt: ukeydown");
+                        var position = player.getAttribute('position');
+                        position.y = 0;
+                        player.setAttribute('position', position);
+                    }                        
+                });
+
+
+            }
+        },
+        tick: function () {
+
+            if(vrmode) {
+                var position = this.el.getAttribute('position');
+                var delta_x = this.scalaire.x * (gauche.pos.x + droite.pos.x) / 2;
+                var delta_y = this.scalaire.y * ((gauche.pos.y + droite.pos.y) / 2 - 1);
+                var delta_z = this.scalaire.z * (gauche.pos.z + droite.pos.z) / 2;
+
+                position.x += delta_x;
+                position.y += delta_y;
+                position.z += delta_z;
+                this.el.setAttribute('position', position);
+
+                if (this.data.trace) {
+                    var trace = document.querySelector('#txtlog');
+                    var newvalue = 'entity = ' + this.el.id
+                        + '\n useragent = QUEST'
+                        + '\n gauche x_y_z = ' + gauche.pos.x.toFixed(2) + '_' + gauche.pos.y.toFixed(2) + '_' + gauche.pos.z.toFixed(2)
+                        + '\n delta x_y_z = ' + delta_x.toFixed(4) + '_' + delta_y.toFixed(4) + '_' + delta_z.toFixed(4)
+                        + '\n scalaire.y = ' + this.scalaire.y
+                        + '\n position x_y_z = ' + position.y.toFixed(2) + '_' + position.y.toFixed(2) + '_' + position.y.toFixed(2)
+                        + '\n player.pos x_y_z = ' + player.pos.x.toFixed(2) + '_' + player.pos.y.toFixed(2) + '_' + player.pos.z.toFixed(2);
+                    if (!info) newvalue = "";
+                    trace.setAttribute('value', newvalue);
+                }
+            } else
+            {
+                if (this.data.trace) {
+                    var trace = document.querySelector('#txtlog');
+                    var position = this.el.getAttribute('position');
+                    var newvalue = 'entity = ' + this.el.id
+                        + '\n useragent = ORDI'
+                        + '\n position x_y_z = ' + position.x.toFixed(2) + '_' + position.y.toFixed(2) + '_' + position.z.toFixed(2)
+                        + '\n player.pos x_y_z = ' + player.pos.x.toFixed(2) + '_' + player.pos.y.toFixed(2) + '_' + player.pos.z.toFixed(2);
+                    if (!info) newvalue = "";
+                    trace.setAttribute('value', newvalue);
+                }  
+            } 
+        },
+    });
+
+    // CHANGE SKY
+    AFRAME.registerComponent('change-sky', {
+        init: function () {
+            var skyEl = document.querySelector('#image-360');
+            var assets = document.querySelectorAll('img[id^="sky"]');
+            var currentIndex = 0;
+
+            window.addEventListener('keydown', function (event) {
+                if (event.key === 'c') {
+                    currentIndex = (currentIndex + 1) % assets.length;
+                    var newAssetId = assets[currentIndex].getAttribute('id');
+                    skyEl.setAttribute('src', '#' + newAssetId);
+                    console.log("new sky = #" + newAssetId);                    
+                }
+            });
+
+            var righthand = document.getElementById('righthand');
+            righthand.addEventListener("abuttondown", function (event) {
+                console.log("evt: abuttondown");
+                currentIndex = (currentIndex + 1) % assets.length;
+                var newAssetId = assets[currentIndex].getAttribute('id');
+                skyEl.setAttribute('src', '#' + newAssetId);
+                console.log("new sky = #" + newAssetId);                 
+            }); 
+
+        }
+    });
+
+    </script>
+
+</head>
+
+<body>
+
+    <a-scene frequency="delay: 500;" renderer="antialias: true"
+    debug-keyboard="key: b,v,n; event: ybuttondown,xbuttondown, abuttondown; target: #lefthand, #lefthand, #righthand">
+
+        <!-- ASSETS -->
+        <a-assets>
+            <img id="sky0" src="./images/1708085454100.png">
+            <img id="sky1" src="./images/ciel2.jpg">
+            <a-asset-item id="boat" src="./3d_model/fishing_boat.glb"></a-asset-item>
+            <a-asset-item id="house" src="./3d_model/stylized_house.glb"></a-asset-item>
+            <a-asset-item id="cloud" src="./3d_model/stylized_clouds.glb"></a-asset-item>
+            <a-asset-item id="ftree" src="./3d_model/simple_japanese_tree.glb"></a-asset-item>
+            <a-asset-item id="fish" src="./3d_model/scalloped_hammerhead_juvenile_low_poly.glb"></a-asset-item>
+            <a-asset-item id="shop" src="./3d_model/oriental_shop.glb"></a-asset-item>
+            <a-asset-item id="yflower" src="./3d_model/lowpoly_hibiscus_flower.glb"></a-asset-item>
+            <a-asset-item id="island" src="./3d_model/low_poly_island.glb"></a-asset-item>
+            <a-asset-item id="grass" src="./3d_model/flower.glb"></a-asset-item>
+            <a-asset-item id="tree" src="./3d_model/birch_tree_-_low_poly.glb"></a-asset-item>
+            <a-asset-item id="flower" src="./3d_model/alien_flower.glb"></a-asset-item>
+        </a-assets>
+
+
+
+        <!-- DEBUT ETUDIANT -->
+        <a-sky id="image-360" radius="500" change-sky radius="10" src="#sky0"></a-sky>
+        
+      <!-- Objets -->
+
+                <!-- ile 1 -->
+                <a-entity position="0.45 0 -2" scale="0.001 0.001 0.001" rotation="0 30 30"
+                gltf-model="#boat"></a-entity>
+
+                <a-entity position="0.5 -0.1 -2" scale="0.01 0.01 0.01"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="0.71 -0.4 -1.8" scale="0.05 0.05 0.05" rotation="0 0 -60"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 2 -->
+                <a-entity position="1.45 1 1.5" scale="0.001 0.001 0.001" rotation="0 90 30"
+                gltf-model="#boat"></a-entity>
+
+                <a-entity position="1.5 0.9 1.5" scale="0.01 0.01 0.01"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="1.71 0.8 1.8" scale="0.05 0.05 0.05" rotation="0 0 -60"
+                gltf-model="#cloud"></a-entity>
+                <a-entity position="1.4 0.8 1.8" scale="0.05 0.05 0.05" rotation="0 0 0"
+                gltf-model="#cloud"></a-entity>
+
+                 <!-- ile 3 -->
+                <a-entity position="2.45 -3 4.5" scale="0.001 0.001 0.001" rotation="0 0 0"
+                gltf-model="#boat"></a-entity>
+
+                <a-entity position="2.45 -3.1 4.5" scale="0.01 0.01 0.01"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="2.71 -3.2 4.8" scale="0.05 0.05 0.05" rotation="0 0 -60"
+                gltf-model="#cloud"></a-entity>
+                <a-entity position="2.4 -3.4 4.8" scale="0.05 0.05 0.05" rotation="0 0 0"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 4 -->
+                <a-entity position="-4.45 -1 4.5" scale="0.001 0.001 0.001" rotation="0 0 0"
+                gltf-model="#boat"></a-entity>
+
+                <a-entity position="-4.45 -1.1 4.5" scale="0.01 0.01 0.01"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="-4.71 -1.2 4.8" scale="0.05 0.05 0.05" rotation="0 0 -60"
+                gltf-model="#cloud"></a-entity>
+                <a-entity position="-4.4 -1.3 4.8" scale="0.05 0.05 0.05" rotation="0 0 0"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 5 -->
+                <a-entity position="-2.45 2.5 -1.5" scale="0.001 0.001 0.001" rotation="0 0 0"
+                gltf-model="#boat"></a-entity>
+
+                <a-entity position="-2.45 2.5 -1.5" scale="0.01 0.01 0.01"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="-2.71 2.5 -1.08" scale="0.05 0.05 0.05" rotation="0 0 -60"
+                gltf-model="#cloud"></a-entity>
+                <a-entity position="-2.4 2.5 -1.08" scale="0.05 0.05 0.05" rotation="0 0 0"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 6 -->
+                <a-entity position="-8.45 5.5 -7" scale="0.001 0.001 0.001" rotation="0 0 0"
+                gltf-model="#boat"></a-entity>
+
+                <a-entity position="-8.45 5.5 -7" scale="0.01 0.01 0.01"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="-8.71 5.4 -6.8" scale="0.05 0.05 0.05" rotation="0 0 -60"
+                gltf-model="#cloud"></a-entity>
+                <a-entity position="-8.4 5.2 -6.8" scale="0.05 0.05 0.05" rotation="0 0 0"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 7 -->
+                <a-entity position="0 0 1" scale="0.1 0.1 0.1" rotation="0 180 0"
+                gltf-model="#house"></a-entity>
+
+                <a-entity position="0 0.02 1" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="0.2 -0.26 1.64" scale="0.05 0.05 0.05" rotation="0 0 -60"
+                gltf-model="#cloud"></a-entity>
+                <a-entity position="0.12 -0.15 1.6" scale="0.05 0.05 0.05" rotation="0 0 0"
+                gltf-model="#cloud"></a-entity>
+
+                 <!-- ile 8 -->
+                <a-entity position="-4.5 -2 -4.5" scale="0.1 0.1 0.1" rotation="0 180 0"
+                gltf-model="#shop"></a-entity>
+
+                <a-entity position="-4.5 -2 -4.5" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="-4.8 -2.2 -4.54" scale="0.05 0.05 0.05" rotation="0 0 -60"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 9 -->
+                <a-entity position="4.5 -2 -4.5" scale="0.001 0.001 0.001" rotation="0 180 0"
+                gltf-model="#tree"></a-entity>
+
+                <a-entity position="4.5 -2 -4.5" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="4.46 -2 -4.26" scale="0.05 0.05 0.05" rotation="0 0 180"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 9 -->
+                <a-entity position="-4.5 -4 3.5" scale="0.001 0.001 0.001" rotation="0 180 0"
+                gltf-model="#tree"></a-entity>
+
+                <a-entity position="-4.5 -4 3.5" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="-4.46 -4 3.76" scale="0.05 0.05 0.05" rotation="0 0 180"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 9 -->
+                <a-entity position="-5 5 2.5" scale="0.001 0.001 0.001" rotation="0 180 0"
+                gltf-model="#tree"></a-entity>
+
+                <a-entity position="-5 5 2.5" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="-5 5 2.26" scale="0.05 0.05 0.05" rotation="0 0 180"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 10 -->
+                <a-entity position="0.5 4 -2.5" scale="0.001 0.001 0.001" rotation="0 180 0"
+                gltf-model="#tree"></a-entity>
+
+                <a-entity position="0.5 4 -2.5" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="0.5 4 -2.22" scale="0.05 0.05 0.05" rotation="0 0 180"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 11 -->
+                <a-entity position="-2 2.5 3.5" scale="0.01 0.01 0.01" rotation="0 180 0"
+                gltf-model="#grass"></a-entity>
+
+                <a-entity position="-2 2.5 3.5" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="-2 2.5 3.72" scale="0.05 0.05 0.05" rotation="0 0 180"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 12 -->
+                <a-entity position="-0.7 2.5 -4.5" scale="0.01 0.01 0.01" rotation="0 180 0"
+                gltf-model="#grass"></a-entity>
+
+                <a-entity position="-0.7 2.5 -4.5" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="-0.7 2.5 -4.22" scale="0.05 0.05 0.05" rotation="0 0 180"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 13 -->
+                <a-entity position="-5 2.0 0.5" scale="0.01 0.01 0.01" rotation="0 180 0"
+                gltf-model="#grass"></a-entity>
+
+                <a-entity position="-5 2.0 0.5" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="-5 2.0 0.72" scale="0.05 0.05 0.05" rotation="0 0 180"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- ile 14 -->
+                <a-entity position="2 5 4.5" scale="0.01 0.01 0.01" rotation="0 180 0"
+                gltf-model="#grass"></a-entity>
+
+                <a-entity position="2 5 4.5" scale="0.012 0.012 0.012" rotation="0 180 0"
+                gltf-model="#island"></a-entity>
+
+                <a-entity position="2 5 4.72" scale="0.05 0.05 0.05" rotation="0 0 180"
+                gltf-model="#cloud"></a-entity>
+
+                <!-- baleine -->
+                <a-entity position="1.2 -3 -1.2" scale="0.5 0.5 0.5" rotation="30 0 40"
+                gltf-model="#fish" animation-mixer></a-entity>
+
+                <a-entity position="-5 -1.3 -0.2" scale="0.5 0.5 0.5" rotation="-30 0 40"
+                gltf-model="#fish" animation-mixer></a-entity>
+
+                <a-entity position="-2.7 0.6 -4" scale="0.6 0.6 0.6" rotation="20 0 -40"
+                gltf-model="#fish" animation-mixer></a-entity> 
+
+                <a-entity position="5 3.2 -4" scale="0.6 0.6 0.6" rotation="45 0 10"
+                gltf-model="#fish" animation-mixer></a-entity>
+
+        <!-- Light-->
+
+        <a-entity light="type: point; intensity: 5; distance: 50; decay: 2; color: #FAFAD2" position="-20 2.3 2.1"></a-entity>
+        <a-entity light="type: point; intensity: 20; distance: 100; decay: 4; color: #702963" position="10 2.3 1.5"></a-entity>
+        <a-entity light="type: point; intensity: 20; distance: 100; decay: 4; color: #483248" position="30 2.3 2.2"></a-entity>
+
+        <!-- FIN ETUDIANT -->
+
+        <!-- PLAYER -->
+        <a-entity id="player" position="0 0 0" fly="scalaire: 0.02 0.02 0.02; trace: true">
+            <a-entity id="cam" camera position="0 0 0" 
+                currentposition="trace:false" 
+                look-controls wasd-controls="acceleration:10">
+                <a-entity id="lefthand" handposition="trace: false" oculus-touch-controls="hand: left"></a-entity>
+                <a-entity id="righthand" handposition="trace: false" oculus-touch-controls="hand: right" droite></a-entity>
+                <a-text id="txtlog" value="" align="center" color="#FF0000" 
+                    position="0 0 -1" rotation="0 0 0" scale="0.25 0.25 0.25">
+                </a-text>
+            </a-entity>
+        </a-entity>
+
+    </a-scene>
+
+</body>
+
+</html>
