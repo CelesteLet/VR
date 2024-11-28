@@ -5,4 +5,4 @@
 * [labyrinthe_2](./labitynthe2.html)
 * [HO LE BAZAR !](./cube.html)
 * [I believe I can fly](./Flying_world.html)
-* [Paysage 360](./skybox.html)
+* [Paysage 360](./skybox/skybox.html)
